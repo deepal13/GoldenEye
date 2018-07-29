@@ -17,6 +17,7 @@ var screenshot = {
       processFixedElements: false
     }, data);
     localStorage['captureWithoutScroll']++;
+    returnErrors();
     screenshot.load(screenshot.addScreen);
   },
 

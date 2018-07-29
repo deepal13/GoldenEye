@@ -19,28 +19,6 @@ var defaultPlugins = [
 			a.attr({'href':url,'download':filename})[0].dispatchEvent(evt)
 		}
 	},
-
-  {
-  name: 'Share with Screenshot Extension',
-  key: 'openscreenshot',
-  dataType: 'image',
-  editorDefault:true,
-  url: '%s'
-  },
-  {
-		name: 'Print',
-		key: 'print',
-		dataType: 'image',
-    editorDefault: true,
-		onclick: function(scope) {
-			var image = scope.image_base64()
-			var x = new Dialog({
-				html: '<img style=border:none;max-width:100% src="data:image/jpg;base64,' + image + '">'
-				// ,ui: 'dialog'
-			});
-			x.print();
-		}
-	},
 {
 	name:'Copy',
 	key:'copy',
