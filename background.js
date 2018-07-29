@@ -1,20 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head lang="en">
-  <meta charset="UTF-8">
-  <title>Website Screenshot</title>
-  <script src="libs/md5.js"></script>
-  <script src="libs/jquery.js"></script>
-  <script src="js/common.js"></script>
-  <script src="settings.js"></script>
-  <script src="extension.js"></script>
-  <script src="js/screenshot.js"></script>
-  <script src="js/codeinjector.js"></script>
-  <script src="js/background.js"></script>
-  <script src="content.js"></script>
-</head>
-<script>
-function htmlentities(str) {
+﻿function htmlentities(str) {
 	var div = document.createElement('div');
 	div.appendChild(document.createTextNode(str));
 	return div.innerHTML;
@@ -26,6 +10,24 @@ function getBaseHostByUrl(url) {
 	var subDomainRegexp = /:\/\/[^\/]*\.([\w-]+\.\w+)([\/?:]|$)/; // sub.domain.com
 	return localUrlRegexp.exec(url) ? 'localhost' : (rootHostRegexp.exec(url) || subDomainRegexp.exec(url))[1];
 }
+
+function initDefaultOptions() {
+	var optionsValues = {
+		showIcon: true,
+		ignore404others: true,
+		ignoreBlockedByClient: true,
+		relativeErrorUrl: true,
+		popupMaxWidth: 70,
+		popupMaxHeight: 40
+	};
+	for(var option in optionsValues) {
+		if(typeof localStorage[option] == 'undefined') {
+			var value = optionsValues[option];
+			localStorage[option] = typeof(value) == 'boolean' ? (value ? 1 : '') : value;
+		}
+	}
+}
+initDefaultOptions();
 
 // Ignore net::ERR_BLOCKED_BY_CLIENT initiated by AdPlus & etc
 var ignoredUrlsHashes = {};
@@ -65,6 +67,32 @@ chrome.webRequest.onErrorOccurred.addListener(function(e) {
 		}
 	}
 }, {urls: ["<all_urls>"]});
+
+function handleInitRequest(data, sender, sendResponse) {
+	var tabHost = getBaseHostByUrl(data.url);
+	chrome.tabs.get(sender.tab.id, function callback() { // mute closed tab error
+		if(chrome.runtime.lastError) {
+			return;
+		}
+		chrome.pageAction.setTitle({
+			tabId: sender.tab.id,
+			title: 'No errors on this page'
+		});
+		chrome.pageAction.setPopup({
+			tabId: sender.tab.id,
+			popup: 'popup.html?host=' + encodeURIComponent(tabHost) + '&tabId=' + sender.tab.id
+		});
+		chrome.pageAction.show(sender.tab.id);
+	});
+	sendResponse({
+		showIcon: typeof localStorage['icon_' + tabHost] != 'undefined' ? localStorage['icon_' + tabHost] : localStorage['showIcon'],
+		showPopup: typeof localStorage['popup_' + tabHost] != 'undefined' ? localStorage['popup_' + tabHost] : localStorage['showPopup'],
+		showPopupOnMouseOver: localStorage['showPopupOnMouseOver'],
+		popupMaxWidth: localStorage['popupMaxWidth'],
+		popupMaxHeight: localStorage['popupMaxHeight']
+
+	});
+}
 
 function handleErrorsRequest(data, sender, sendResponse) {
 	var popupErrors = [];
@@ -144,6 +172,19 @@ function handleErrorsRequest(data, sender, sendResponse) {
 			return;
 		}
 
+		chrome.pageAction.setTitle({
+			tabId: sender.tab.id,
+			title: 'There are some errors on this page. Click to see details.'
+		});
+
+		chrome.pageAction.setIcon({
+			tabId: sender.tab.id,
+			path: {
+				"19": "img/error_19.png",
+				"38": "img/error_38.png"
+			}
+		});
+
 		var errorsHtml = popupErrors.join('<br/><br/>');
 
 		if(localStorage['relativeErrorUrl'] && tabBaseUrl) {
@@ -152,16 +193,26 @@ function handleErrorsRequest(data, sender, sendResponse) {
 				errorsHtml = errorsHtml.split('href="view-source:/').join('href="view-source:' + tabBaseUrl + '/');
 			}
 		}
+
+		var popupUri = 'popup.html?errors=' + encodeURIComponent(errorsHtml) + '&host=' + encodeURIComponent(tabHost) + '&tabId=' + sender.tab.id;
+
+		chrome.pageAction.setPopup({
+			tabId: sender.tab.id,
+			popup: popupUri
+		});
+
+		chrome.pageAction.show(sender.tab.id);
+
+		sendResponse(chrome.extension.getURL(popupUri));
 	});
 }
 
 chrome.runtime.onMessage.addListener(function(data, sender, sendResponse) {
-	if(data._errors) {
+	if(data._initPage) {
+		handleInitRequest(data, sender, sendResponse);
+	}
+	else if(data._errors) {
 		handleErrorsRequest(data, sender, sendResponse);
 	}
 	return true;
 });
-</script>
-<body>
-</body>
-</html>

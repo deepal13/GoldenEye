@@ -21,6 +21,18 @@
   "background": {
     "page": "background.html"
   },
+	"content_scripts": [
+		{
+			"all_frames": true,
+			"js": [
+				"content.js"
+			],
+			"matches": [
+				"<all_urls>"
+			],
+			"run_at": "document_start"
+		}
+	],
   "browser_action": {
     "default_icon": "images/browseraction.png",
     "default_title": "Screenshot Extension",
@@ -39,5 +51,9 @@
   "offline_enabled": true,
   "default_locale": "en",
   "permissions": ["activeTab"],
-  "optional_permissions": ["desktopCapture"]
+  "optional_permissions": [		"storage",
+    "desktopCapture",
+    "<all_urls>",
+		"tabs",
+		"webRequest"]
 }

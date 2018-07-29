@@ -63,6 +63,8 @@ function editor_obj()
 		currentLevel.active=true;
 		currentLevel.color=theColor;
 		currentLevel.lineWidth=lineWidth;
+//		c.strokeStyle=currentLevel.color;
+//		c.fillStyle=currentLevel.color;
 		resetButtons();
 		return(newObject);
 		}
@@ -105,6 +107,7 @@ function editor_obj()
 			currentLevel=levels[currentIndex];
 			}
 		changeTool('line');
+		//$('canvas.tool:visible:last').hide();
 		resetButtons();
 		};
 	tool.redo.click=function ()
@@ -167,6 +170,7 @@ function editor_obj()
 		moreParams=moreParams || {}
 		if (imageChanged!=localStorage['pngjpg'])
 			{
+			//$('#done_preview canvas').remove();
 			var done=$('<canvas style=display:none; class=done></canvas>')[0];
 			done.width=clip.rx2-clip.rx1;
 			done.height=clip.ry2-clip.ry1;
@@ -176,6 +180,10 @@ function editor_obj()
 				done.height+=10;
 			}
 			var ctx=done.getContext('2d');
+			//ctx.drawImage(canvasData.toDataURL(),-clip.rx1,-clip.ry1);
+			// var id=canvasData.getContext('2d').getImageData(clip.rx1,clip.ry1,clip.rx2,clip.ry2);
+			// var id=canvasData.getContext('2d').getImageData(clip.rx1,clip.ry1,100,100);
+			// ctx.putImageData(id,0,0);
 
 			ctx.drawImage(   $('#imgFixForLong')[0],clip.rx1,clip.ry1,clip.rx2-clip.rx1, clip.ry2-clip.ry1 ,0,0,clip.rx2-clip.rx1, clip.ry2-clip.ry1 )
 
@@ -200,13 +208,23 @@ function editor_obj()
 			else
 				{
 				canvasToDataURL=done.toDataURL('image/jpeg');
+//				imageChanged=localStorage['pngjpg'];
+//				je.encode ( ctx.getImageData(0,0,done.width,done.height),90,
+//					function (y) {
+//						canvasToDataURL=y;
+//						createLastCanvas(todo);
+//					}  ,true)
+//				return;
 				}
 			}
 		if(todo=='toolbar') {
 			moreParams(canvasToDataURL);
 			return
 		}
-		
+		//chrome.extension.getBackgroundPage().lastCanvas={ height:canvas.height, width:canvas.width, data:canvasToDataURL};
+		//$('#bug2')[canvasToDataURL.length>2000000 ? 'show' : 'hide']();
+		//document.getElementById('done_preview').appendChild(this);
+		//$('#reloadHelper2').unbind().click(function () {addCopyHelper.apply(canvas);});
 		if(todo=='save')
 			{
 			noMoreWait();
@@ -233,12 +251,14 @@ function editor_obj()
 				var filename;
 				filename=screenshot.title || screenshot.url;
 				filename=filename.replace(/[%&\(\)\\\/\:\*\?\"\<\>\|\/\]]/g,' ');
+				// filename+='-' + (new Date).getHours().toString().twoDigits() + (new Date).getMinutes().toString().twoDigits() + (new Date).getSeconds().toString().twoDigits()
 				filename+=localStorage['pngjpg']=='png' ? '.png' : '.jpg';
 
 				var evt = document.createEvent("MouseEvents");evt.initMouseEvent("click", true, true, window,0, 0, 0, 0, 0, false, true, false, false, 0, null);
 				a=$('<a></a>').appendTo(document.body);
 				a.attr({'href':url,'download':filename})[0].dispatchEvent(evt)
 				imageChanged=false;
+		//		im=$('<div><img /></div>').find('img').attr('src',url).end().dialog()
 
 				}
 				else{
@@ -246,7 +266,9 @@ function editor_obj()
 						{
 
 						$('#topText').html('<a id=sss href="' + filename  + '">Click here to Open</a>');
+		//				$('#topText').html('File Saved!');
 						$('#save').add('#toGoogleDrive').add('#print').attr('disabled','');
+		//				return true;
 						var evt = document.createEvent("MouseEvents");evt.initMouseEvent("click", true, true, window,0, 0, 0, 0, 0, false, true, false, false, 0, null);
 						document.getElementById("sss").dispatchEvent(evt)
 						$('#save').add('#toGoogleDrive').add('#open').add('#print').attr('disabled','');
@@ -300,8 +322,10 @@ function editor_obj()
 	this.reloadCanvas=function()
 		{
 		if(screenshot.url) $('title').html(screenshot.url);
+		//document.getElementById('divCanvasData').appendChild(canvasData);
 		clipReload();
 		onResize();
+		//editor.reloadCanvas();
 		resetButtons();
 		$('#toolbar .button[tag=' + localStorage['lastTool'] + ']').trigger('click');
 		}
@@ -404,6 +428,7 @@ function editor_obj()
 		$('anvas.tool').on('mousemove',
 			function (e) {
 				$this=$(this);
+//				console.log(e.offsetX,e.offsetY,e)
 				x=e.offsetX;
 				y=e.offsetY;
 				doIt=false;
@@ -427,6 +452,7 @@ function editor_obj()
 					})
 				myBorder.mouseleave(function()
 					{
+					//	console.log(e);
 					myBorder.remove();
 					});
 
@@ -488,6 +514,10 @@ function editor_obj()
 						canvas.height=this.height
 						firstImage=this
 						canvas.getContext('2d').drawImage(this,0,0)
+						// $(this).css({
+						// 	width:this.width,
+						// 	height:this.height
+						// })
 						editor.reloadCanvas();
 					}
 					try{
@@ -636,10 +666,12 @@ function editor_obj()
 		};
 	tool.crop.click=function()
 		{
+		//clipReload();
 		onResize();
 		};
 	tool.crop.up=function ()
 		{
+			// currentLevel.type='crop';
 		if( ry2-ry1 + rx2-rx1<100) {
 			tool.crop.draw()
 			return
@@ -663,6 +695,8 @@ function editor_obj()
 		onResize();
 		$('#divCanvasData').scrollTop(0).scrollLeft(0);
 		tool.status='ready';
+		//$('#toolbar .button[tag=line]').trigger('click');
+		//tool.current='line';
 		resetButtons();
 		};
 	tool.crop.move=function (e)
@@ -834,6 +868,18 @@ function editor_obj()
 		context.shadowOffsetY = 5;
 		context.lineWidth=inX.data.lineWidth;
 
+		// inX.ctx.beginPath();
+		// inX.ctx.lineWidth=inX.data.lineWidth;
+
+		// inX.ctx.strokeStyle='00';
+		// inX.ctx.fillStyle='000';
+		// inX.ctx.globalAlpha=0.3;
+		// for(var i=1;i<inX.data.points.length;i++)
+		// {
+		// 	inX.ctx.lineTo(inX.data.points[i].x -inX.data.canvasOffset.x+shadowDistance  ,inX.data.points[i].y -inX.data.canvasOffset.y+shadowDistance);
+		// };
+		// inX.ctx.stroke();
+		// inX.ctx.closePath();
 		inX.ctx.beginPath();
 		inX.ctx.strokeStyle=inX.data.color;
 		inX.ctx.globalAlpha=1;
@@ -866,6 +912,7 @@ function editor_obj()
 			tool.highlight.move=function(e)
 				{
 				currentLevel.points.push({x:e.x,y:e.y});
+		//		ans=canvasAutoResize(e,2);
 				canvas.height=canvas.height+1;
 				canvas.height=canvas.height-1;
 				ans=getMinMax(currentLevel.points);
@@ -881,7 +928,18 @@ function editor_obj()
 				context.globalAlpha=0.45
 				inX.ctx.lineWidth=20;
 
-				
+				// inX.ctx.beginPath();
+				// inX.ctx.lineWidth=inX.data.lineWidth;
+
+				// inX.ctx.strokeStyle='00';
+				// inX.ctx.fillStyle='000';
+				// inX.ctx.globalAlpha=0.3;
+				// for(var i=1;i<inX.data.points.length;i++)
+				// {
+				// 	inX.ctx.lineTo(inX.data.points[i].x -inX.data.canvasOffset.x+shadowDistance  ,inX.data.points[i].y -inX.data.canvasOffset.y+shadowDistance);
+				// };
+				// inX.ctx.stroke();
+				// inX.ctx.closePath();
 				inX.ctx.beginPath();
 				inX.ctx.strokeStyle=inX.data.color;
 				inX.ctx.fillStyle=inX.data.color;
