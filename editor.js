@@ -2198,10 +2198,7 @@ $(function(){
   });
 
 	$('.share').on('click',function (e){
-		var x=staticPlugin.getPluginByKey('openscreenshot')
-		editor.createLastCanvas('toolbar',function (data){
-			x.run(data, e);
-		});
+		window.open('https://servicetitan.atlassian.net/secure/Dashboard.jspa', '_blank');
 	});
 	
 	$('.save').on('click',function (e){
