@@ -28,20 +28,22 @@
 					timer = null;
 					chrome.runtime.sendMessage({
 						_errors: true,
-						errors: errors,
+						errors: errText,
 					});
 				}, 200);
 			}
 		}
 	}
-	function returnErrors()
-	{
-		download('test.txt', chrome.storage.local.get(['errorText']));
-	}
+	window.onload = setTimeout(function(){
+		alert(errText);
+	}, 10000);
+	document.addEventListener('downloadErrors', function() {
+		alert(errText);
+		download('test.txt', errText);
+	});
 	document.addEventListener('ErrorToExtension', function(e) {
 		var error = e.detail;
 		errText+=JSON.stringify(error);
-		chrome.storage.local.set({'errorText': errText});
 		handleNewError(error);
 	});
 	function codeToInject() {
