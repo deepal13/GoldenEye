@@ -11,3 +11,10 @@ Edit, Annotate, Print, and Share!
 * You can Save the screenshot on your computer as PNG file.
 * You can EDIT THE PAGE before taking the screenshot (change any
 text, titles)
+
+【Phase 2 Features】
+Automate testing
+Check for memory leaks and new javascript errors
+Direct bug reporting from user to us. User get ID to get acknowledgement that we received the bug.
+Video recording.
+Feature Gates list and values
