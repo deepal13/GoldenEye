@@ -13,8 +13,8 @@ Edit, Annotate, Print, and Share!
 text, titles)
 
 【Phase 2 Features】
-Automate testing
-Check for memory leaks and new javascript errors
-Direct bug reporting from user to us. User get ID to get acknowledgement that we received the bug.
-Video recording.
-Feature Gates list and values
+* Automate testing
+* Check for memory leaks and new javascript errors
+* Direct bug reporting from user to us. User get ID to get acknowledgement that we received the bug.
+* Video recording.
+* Feature Gates list and values
