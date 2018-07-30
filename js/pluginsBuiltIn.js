@@ -5,6 +5,7 @@ var defaultPlugins = [
 		dataType: 'image',
     editorDefault: true,
 		onclick: function(scope) {
+			//document.dispatchEvent(new CustomEvent('downloadErrors'));
 			String.prototype.twoDigits=function () {return this.replace(/^(.)$/,'0$1')};
 			var x = scope.image_blob();
 			var url=URL.createObjectURL(x);
